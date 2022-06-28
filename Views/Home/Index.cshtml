@@ -1,0 +1,107 @@
+﻿@model IEnumerable<Url>
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<script type="text/javascript">
+
+    function shortenUrl() {
+        $.ajax({
+            url: '/Home/CreateUrl',
+            dataType: "json",
+            async: true,
+            jsonp: false,
+            type: "POST",
+            data: {
+                url: $("#OriginalUrl").val(),
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                alert("Error: " + errorThrown);
+            },
+            success: function (data) {
+                //console.log(data); 
+              
+                if (data.validUrl == true) {
+                    $("#shortenedOutput").html('<a href="' + data.url.shortUrl + '" target="_blank" id=shortened>' + data.url.shortUrl + '</a>  <button class="btn btn-primary" onclick="copyUrl()">Copy Url</button>');
+                    
+                } else {
+                    if (data.originalUrl != null) {
+                        $("#shortenedOutput").html('<p>' + data.originalUrl + ' is not a valid URL. ' + data.message + '</p > ');
+                    } else {
+                        $("#shortenedOutput").html('<p>' + data.message + '</p > ');
+
+                    }
+
+                }
+            }
+        });
+    }
+
+
+    function copyUrl() {
+         //Get the text field 
+        var copyText = document.getElementById("shortened");
+        /* Copy the text inside the text field */
+        navigator.clipboard.writeText(copyText.innerText);
+        ///* Alert the copied text */
+        alert("Copied: " + copyText.innerText);
+    }
+   </script>
+
+<div class="text-center">
+
+    <h1>Shorten Your Urls Here</h1>
+    <p>
+        Enter your URL below to retrieve the shortened version. Remember to submit the full url including HTTP / HTTPs.
+    </p>
+    <p>
+        We recommend copy and pasting the url from your browser search bar.
+    </p>
+    <div class="row"> 
+    <div class="col-md-2"></div>
+    <div class="col-md-8">
+        <div class="jumbotron">
+            <p><b>Paste your long URL here:</b></p>
+            <div class="row d-flex justify-content-center">
+                <div class="col-md-6">
+                    @Html.TextBox("OriginalUrl", null, new { @class = "form-control input-sm ", @placeholder = "Your URL", required = "required" })
+                </div>
+                <div class="col-md-2">
+                    <button class="btn btn-primary" onclick="shortenUrl()">Shorten</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2"></div>
+</div>
+    <div id="shortenedOutput"></div>
+
+    @if (Model.Count() > 0) { 
+<div class="">
+    <div class="row d-flex justify-content-center add-margin"><h3>Recent Urls</h3></div>
+    <div class=" row d-flex justify-content-center">
+        <div class="col-md-3"><h5>Original Url</h5></div>
+        <div class="col-md-3"><h5>Shortened Url</h5></div>
+    </div>
+    @foreach(var url in Model)
+    {
+    <div class="row d-flex justify-content-center">
+        <div class="col-md-3">
+            @if (@url.OriginalUrl.Length > 25)
+            {
+                <a href="@url.OriginalUrl" target="_blank"> @url.OriginalUrl.Substring(0, 24)...</a>
+            }
+            else
+            {
+                <a href="@url.OriginalUrl" target="_blank">@url.OriginalUrl</a>
+            }
+
+        </div>
+        <div class="col-md-3">
+            <a href="@url.ShortUrl" target="_blank">@url.ShortUrl</a>
+        </div>
+    </div>
+    }
+</div>
+    }
+</div>
